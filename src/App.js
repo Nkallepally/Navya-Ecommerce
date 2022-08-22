@@ -1,52 +1,105 @@
-
-import './App.css';
 import axios from 'axios';
+import React, { useEffect, useState } from 'react'
 import Pagination from './pagination';
-import { useEffect, useState } from 'react';
+import "./App.css"
+import Modal from 'react-bootstrap/Modal';
 
-function App() {
 
-    const [postPage,setPostPage] = useState([])
-    const [hover , setHover] = useState(false)
-    const [posts , setPosts] = useState([])
+const App = () => {
+
+    const showperpage = 10;
+    const [pagenation , setpagenation] = useState({
+        start : 0,
+        end : showperpage
+    })
+
+    const [get,setget] = useState(true)
+    const [alldata,setalldata]=useState([])
+    const [data,setdata] = useState([])
+    const [pop,setpop] = useState({})
+    const [show, setshow] = useState(false)
+
+    const handleShow = () => setshow(true);
+    const handleClose = () => setshow(false);
+
 
     useEffect(()=>{
-      axios.get("https://fakestoreapi.com/products").then((res)=>{
-          setPosts(res.data)
-          setPostPage(res.data.slice(0 , 3))
-          console.log(res.data)
-      })
-    },[])
+     axios.get("https://fakestoreapi.com/products").then((data)=>{
+      console.log(data.data)
+      setdata(data.data)
+      setalldata(data.data)
+     })
+    },[get])
 
-    const hoverOn = (e)=>{
-      e.preventDefault()
-      setHover(true)
-      console.log("hoverd")
-    }
-
-    const hoverEnd = (e)=>{
-      e.preventDefault()
-      setHover(false)
-    }
-
-    const handlePage = (pages)=>{
-      setPostPage(posts.slice((pages*4)-4 , pages*4))
-    }
-  return (
-      <>
-      {
-        postPage.map((user)=>{
-          return(
-            <>
-              {hover && <p className={hover}>{user.description}</p>}
-              <img onMouseEnter={(e)=>{hoverOn(e)}} onMouseLeave={(e)=>{hoverEnd(e)}} src={user.image} alt="Not Found" />
-            </>
-          )
-        })
+    const handleSelect = (e)=>{
+      if(e.target.value ==="all"){
+         setget(!get)
+      }else{
+        const newdata = alldata.filter((item)=>{
+          return item.category.includes(e.target.value)
+         })
+         setdata(newdata)
       }
-      <Pagination posts={posts} handlePage={handlePage}/>
-      </>
-  );
+    }
+
+    const handlePopUp = (item)=>{
+      setpop(item)
+      handleShow()
+    }
+
+    const onPaginationChange = (start,end)=>{
+        setpagenation({start : start,end : end})
+    }
+
+    const closePopUp = ()=>{
+      handleClose()
+    }
+
+  return (
+    <div>
+      <div className='header'>
+        <h2>Available Products</h2>
+      </div>
+      <div className='select'>
+              <select onChange={(e)=>handleSelect(e)}>
+                <option value="all">All</option>
+                  <option value="electronics">Electronics</option>
+                  <option value="men" >men's clothing</option>
+                  <option value="jewelery" >jewelery</option>
+                  <option value="women">women's clothing</option>
+              </select>
+      </div>
+      <div className='main-body'>
+        {
+        data.slice(pagenation.start , pagenation.end).map((item,idx)=>{
+            return (
+              <div key={idx} className="imagesection" onClick={()=>handlePopUp(item)}>
+                <img src={item.image} alt="Not Found"/>
+              </div>
+            )
+        })
+        }
+      </div>
+      <div className='pagination'>
+        <Pagination showPerPage ={showperpage} total = {data.length} onPaginationChange = {onPaginationChange}/>
+      </div>
+      <Modal show={show} onHide={handleClose} animation={false} centered
+          style={{ marginLeft: "35%", marginTop: "5%", width: "500px", height: "400px", lineHeight: "25px", textAlign: "center" }}>
+          <Modal.Body>
+             <div>
+               <div className='heading'>
+                <span>{pop.category}</span>
+                <button onClick={()=>closePopUp()}>Close</button>
+               </div>
+               <div className='modalbody'>
+                <img src={pop.image} alt="Not Found"/>
+                <span style={{"textAlign":"left","marginLeft":"20px"}}> <span style={{"fontWeight":"bold"}}>Desricption :</span> {pop.description}</span>
+               </div>
+             </div>
+          </Modal.Body>
+        </Modal>
+    </div>
+  )
 }
 
-export default App;
+export default App
