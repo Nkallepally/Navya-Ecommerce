@@ -2,12 +2,21 @@
 import './App.css';
 import axios from 'axios';
 import Pagination from './pagination';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 function App() {
 
-    const [postPage,setPostPge] = useState([])
+    const [postPage,setPostPage] = useState([])
     const [hover , setHover] = useState(false)
+    const [posts , setPosts] = useState([])
+
+    useEffect(()=>{
+      axios.get("https://fakestoreapi.com/products").then((res)=>{
+          setPosts(res.data)
+          setPostPage(res.data.slice(0 , 3))
+          console.log(res.data)
+      })
+    },[])
 
     const hoverOn = (e)=>{
       e.preventDefault()
@@ -20,6 +29,9 @@ function App() {
       setHover(false)
     }
 
+    const handlePage = (pages)=>{
+      setPostPage(posts.slice((pages*4)-4 , pages*4))
+    }
   return (
       <>
       {
@@ -32,6 +44,7 @@ function App() {
           )
         })
       }
+      <Pagination posts={posts} handlePage={handlePage}/>
       </>
   );
 }
