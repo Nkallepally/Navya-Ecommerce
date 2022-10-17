@@ -65,7 +65,7 @@ const App = () => {
                 <option value="all">All</option>
                   <option value="electronics">Electronics</option>
                   <option value="men" >men's clothing</option>
-                  <option value="jewelery" >jewelery</option>
+                  <option value="jewellery" >jewellery</option>
                   <option value="women">women's clothing</option>
               </select>
       </div>
